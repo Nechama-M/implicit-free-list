@@ -3,16 +3,9 @@
 #define __MEMORY_ALLOCATOR_H__
 #include <stdio.h>
 
-typedef struct MemoryAllocator
-{
-	size_t m_size;
-	void * m_memoryPool;
-} MemoryAllocator;
+typedef struct MemoryAllocator MemoryAllocator;
 
-typedef struct MetaData
-{
-	size_t m_size;
-}MetaData;
+
 
 
 /* memoryPool is a ptr to an already-existing large memoryblock */
@@ -31,10 +24,8 @@ largest free block */
 size_t MemoryAllocator_optimize(MemoryAllocator* allocator);
 
 
-#endif/*__MEMORY_ALLOCATOR_H__*/‏
 
 
 
 
-
-
+#endif
