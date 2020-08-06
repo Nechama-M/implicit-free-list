@@ -8,5 +8,6 @@ int main()
 	printf("%ld",MemoryAllocator_optimize(heap));
 	temp = MemoryAllocator_release(heap);
 	free(temp);
+	
 	return 0;
 }

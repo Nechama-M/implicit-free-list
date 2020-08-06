@@ -25,16 +25,18 @@ static size_t AlignBlock(size_t size)
 bool IsFreeBlock(void *block)
 {
 	return !(*(size_t*)block & LSB) ;
-
 }
+
 bool BlokIsAvaible(void * block,size_t size)
 {
 	return size+SizeOfMetaData <= *((size_t* )block);
 }
+
 void * GetPayload(void *ptr)
 {
 	return (void *)((size_t *)ptr + 1);
 }
+
 bool EndOfMemory(MemoryAllocator* allocator,void * ptr)
 {
 	return (void *)((char *)(allocator->m_memoryPool) + allocator->m_size) > ptr;
@@ -42,11 +44,12 @@ bool EndOfMemory(MemoryAllocator* allocator,void * ptr)
 
 void * NextBlock(void * block)
 {
-	if(!EndOfMemory)
+	if (!EndOfMemory)
 	{
 		void * temp = block;
 		temp = (char *)temp + ((*((size_t*)block))^LSB);
 		block = (void *)temp;
+		
 		return block;
 	}
 	else
@@ -58,13 +61,13 @@ void * NextBlock(void * block)
 void MergesBlocks(void * block)
 {
 	void * temp = NextBlock(block);
-	size_t temp_size = *((size_t *)block)+ *((size_t *)temp) - SizeOfMetaData;
+	size_t temp_size = *((size_t *)block) + *((size_t *)temp) - SizeOfMetaData;
 	*((size_t *)block) = temp_size;
 }
 
 void * a_malloc(void * block,size_t size)
 {
-	if(size < *((size_t *)block))
+	if (size < *((size_t *)block))
 	{
 		void * next_block = (char *)block + size;
 		*((size_t *)next_block) = (*(size_t *)block) - size;
@@ -73,10 +76,9 @@ void * a_malloc(void * block,size_t size)
 	*((size_t *)block) = (*((size_t *)block) | LSB);
 	
 	return  GetPayload(block);
-
 }
-
 /*end Aux. function*/
+
 
 /* memoryPool is a ptr to an already-existing large memoryblock */
 MemoryAllocator* MemoryAllocator_init(void* memoryPool, size_t size)
@@ -86,6 +88,7 @@ MemoryAllocator* MemoryAllocator_init(void* memoryPool, size_t size)
 	heap->m_size = size % BlockSize ==0 ? size : size - size % BlockSize;
 	heap->m_memoryPool = memoryPool;
 	*((size_t*)(heap->m_memoryPool)) = size;
+	
 	return heap;
 }
 
@@ -94,6 +97,7 @@ void* MemoryAllocator_release(MemoryAllocator* allocator)
 {
 	void * temp = allocator->m_memoryPool;
 	free(allocator);
+	
 	return temp;
 }
 
@@ -102,21 +106,21 @@ void* MemoryAllocator_allocate(MemoryAllocator* allocator, size_t size)
 	size = AlignBlock(size);
 	void * temp_ptr = allocator->m_memoryPool;
 	size_t sum =0;
-	while(!EndOfMemory(allocator,temp_ptr))
+	while (!EndOfMemory(allocator,temp_ptr))
 	{
-		if(IsFreeBlock(temp_ptr))
+		if (IsFreeBlock(temp_ptr))
 		{
-			if(BlokIsAvaible(temp_ptr,size))
+			if (BlokIsAvaible(temp_ptr,size))
 			{
 				return a_malloc(temp_ptr,size);
 			}
 			else
 			{
-				while(IsFreeBlock(NextBlock(temp_ptr)) && !(BlokIsAvaible(temp_ptr,size)))
+				while (IsFreeBlock(NextBlock(temp_ptr)) && !(BlokIsAvaible(temp_ptr,size)))
 				{
 					MergesBlocks(temp_ptr);	
 				}
-				if(BlokIsAvaible(temp_ptr,size))
+				if (BlokIsAvaible(temp_ptr,size))
 				{
 					return a_malloc(temp_ptr,size);
 				}
@@ -124,14 +128,14 @@ void* MemoryAllocator_allocate(MemoryAllocator* allocator, size_t size)
 		}
 		temp_ptr = NextBlock(temp_ptr);
 	}
-	return NULL;
 	
+	return NULL;
 }
 
 /* Merge the next adjacent block is free */
 void MemoryAllocator_free(MemoryAllocator* allocator, void* ptr)
 {
-	if(ptr == NULL)
+	if (ptr == NULL)
 		return;
 
 	void *tmp = NextBlock(ptr - SizeOfMetaData);
@@ -153,15 +157,15 @@ size_t MemoryAllocator_optimize(MemoryAllocator* allocator)
 	void * temp_ptr = allocator->m_memoryPool;
     	sum  += (*((size_t*)temp_ptr) ^ 1);
 
-    	while(sum<= allocator->m_size)
+    	while (sum<= allocator->m_size)
 	{
-		if(IsFreeBlock(temp_ptr))
+		if (IsFreeBlock(temp_ptr))
 		{
-			while(IsFreeBlock(NextBlock(temp_ptr))== true )
+			while (IsFreeBlock(NextBlock(temp_ptr))== true )
 			{
 				MergesBlocks(temp_ptr);
 			}
-			if(*((size_t*)temp_ptr)>max_size)
+			if (*((size_t*)temp_ptr)>max_size)
 			{
 				max_size = *((size_t*)temp_ptr);
 			}
@@ -169,12 +173,6 @@ size_t MemoryAllocator_optimize(MemoryAllocator* allocator)
 		sum  += *((size_t*)(NextBlock(temp_ptr)));
 		temp_ptr = NextBlock(temp_ptr);
 	}
-	return max_size;
 	
-	
-	
-	
-	
-	
-	
+	return max_size;	
 }
